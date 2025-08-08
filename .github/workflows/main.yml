@@ -1,8 +1,6 @@
 name: CI
 
 on:
-  push:
-  pull_request:
   workflow_dispatch:
   release:
     types: [published]
@@ -22,9 +20,11 @@ jobs:
         with:
           repository: acidanthera/MacKernelSDK
           path: MacKernelSDK
+
       - name: CI Bootstrap
         run: |
           src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/master/ci-bootstrap.sh) && eval "$src" || exit 1
+
       - name: Lilu Bootstrap
         run: |
           src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/Lilu/master/Lilu/Scripts/bootstrap.sh) && eval "$src" || exit 1
@@ -37,14 +37,19 @@ jobs:
         with:
           name: Artifacts
           path: build/*/*.zip
+
+      - name: Create Release body
+        run: |
+          printf "**v%s**\n\n" ${GITHUB_REF/refs\/tags\//} > body.txt
+          printf "* %s\n" "Info.plist: clean up eficheck IONameMatch entries" >> body.txt
+
       - name: Upload to Release
         if: github.event_name == 'release'
-        uses: svenstaro/upload-release-action@v2
+        uses: softprops/action-gh-release@v2
         with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: build/*/*.zip
-          tag: ${{ github.ref }}
-          file_glob: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          body_path: ./body.txt
+          files: build/*/*.zip
 
   analyze-clang:
     name: Analyze Clang
@@ -57,9 +62,11 @@ jobs:
         with:
           repository: acidanthera/MacKernelSDK
           path: MacKernelSDK
+
       - name: CI Bootstrap
         run: |
           src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/master/ci-bootstrap.sh) && eval "$src" || exit 1
+
       - name: Lilu Bootstrap
         run: |
           src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/Lilu/master/Lilu/Scripts/bootstrap.sh) && eval "$src" || exit 1
@@ -79,9 +86,11 @@ jobs:
         with:
           repository: acidanthera/MacKernelSDK
           path: MacKernelSDK
+
       - name: CI Bootstrap
         run: |
           src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/master/ci-bootstrap.sh) && eval "$src" || exit 1
+
       - name: Lilu Bootstrap
         run: |
           src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/Lilu/master/Lilu/Scripts/bootstrap.sh) && eval "$src" || exit 1
