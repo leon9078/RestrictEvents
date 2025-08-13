@@ -239,7 +239,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "cd \"${TARGET_BUILD_DIR}\"\n\ndist=(\"$FULL_PRODUCT_NAME\")\nif [ -d \"$DWARF_DSYM_FILE_NAME\" ]; then dist+=(\"$DWARF_DSYM_FILE_NAME\"); fi\n\narchive=\"${PRODUCT_NAME}-${MODULE_VERSION}-$(echo $CONFIGURATION | tr /a-z/ /A-Z/).zip\"\nrm -rf *.zip\nzip -qry -FS \"${archive}\" \"${dist[@]}\"\n";
+			shellScript = "cd \"${TARGET_BUILD_DIR}\"\n\ndist=(\"$FULL_PRODUCT_NAME\")\nif [ -d \"$DWARF_DSYM_FILE_NAME\" ]; then dist+=(\"$DWARF_DSYM_FILE_NAME\"); fi\n\narchive=\"${PRODUCT_NAME}-${MODULE_VERSION}-$(echo $CONFIGURATION | tr /a-z/ /A-Z/).zip\"\nrm -rf *.zip\nfind * -maxdepth 0 -name \"*.dSYM\" -exec sh -c 'mv \"$1\" \"${1%.dSYM}_dSYM\"' _ {} \\;\nfind * -print0 | xargs -0 ls -pd1 | sort | perl -pe \"s/_dSYM/.dSYM/\" | tee in.txt\nfind * -maxdepth 0 -name \"*_dSYM\" -exec sh -c 'mv \"$1\" \"${1%_dSYM}.dSYM\"' _ {} \\;\nfind . -exec touch -m \"{}\" \"+\"\nzip -@ \"${archive}\" < in.txt\nrm in.txt\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
